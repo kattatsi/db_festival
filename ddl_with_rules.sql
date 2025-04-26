@@ -1201,6 +1201,185 @@ END;
 
 DELIMITER ;
 
+-- === unique_festival_year.sql ===
+-- Το φεστιβάλ διεξάγεται ετησίως
+
+ALTER TABLE Festival
+ADD CONSTRAINT unique_festival_year
+UNIQUE (Year);
+
+
+-- === consecutive_days.sql ===
+-- Το φεστιβάλ διεξάγεται ετησίως, σε μία ή περισσότερες συνεχόμενες ημέρες
+
+ALTER TABLE Festival
+ADD CONSTRAINT chk_consecutive_days
+CHECK (Days = DATEDIFF(EndDate, StartDate) + 1);
+
+
+-- === unique_location_per_year.sql ===
+-- Το φεστιβάλ διεξάγεται ετησίως, σε διαφορετική τοποθεσία ανά έτος
+
+DELIMITER //
+
+CREATE TRIGGER trg_Unique_Location_Per_Year
+BEFORE INSERT ON Festival
+FOR EACH ROW
+BEGIN
+  DECLARE existing_location INT;
+
+  SELECT COUNT(*) INTO existing_location
+  FROM Festival
+  WHERE Year = NEW.Year AND Location_Location_id = NEW.Location_Location_id;
+
+  IF existing_location > 0 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'A festival cannot be held in the same location more than once per year.';
+  END IF;
+END;
+//
+
+DELIMITER ;
+
+-- === stage_event_overlap.sql ===
+-- Κάθε σκηνή μπορεί να φιλοξενεί μόνο μία παράσταση (event) την ίδια στιγμή
+
+DELIMITER //
+
+CREATE TRIGGER trg_OnlyOneEventAtTime_PerStage
+BEFORE INSERT ON Performance
+FOR EACH ROW
+BEGIN
+  DECLARE stage_id INT;
+  DECLARE overlap_count INT;
+
+  -- Βρες τη σκηνή στην οποία θα γίνει η νέα εμφάνιση
+  SELECT Stage_Stage_id INTO stage_id
+  FROM Event
+  WHERE Event_id = NEW.Event_Event_id;
+
+  -- Έλεγξε αν υπάρχουν άλλες performances την ίδια στιγμή στη σκηνή
+  SELECT COUNT(*) INTO overlap_count
+  FROM Performance p
+  JOIN Event e ON p.Event_Event_id = e.Event_id
+  WHERE e.Stage_Stage_id = stage_id
+    AND (
+      -- Η νέα performance ξεκινά μέσα σε υπάρχουσα
+      (NEW.StartTime BETWEEN p.StartTime AND ADDTIME(p.StartTime, SEC_TO_TIME(p.Duration * 60)))
+      OR
+      -- Ή υπάρχουσα ξεκινά μέσα στη νέα
+      (p.StartTime BETWEEN NEW.StartTime AND ADDTIME(NEW.StartTime, SEC_TO_TIME(NEW.Duration * 60)))
+    );
+
+  IF overlap_count > 0 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Only one event (via its performances) can be active on a stage at a time.';
+  END IF;
+END;
+//
+
+DELIMITER ;
+
+
+-- === sequential_performances_per_event.sql ===
+-- Σε κάθε event, οι performances πρέπει να είναι σειριακές
+
+DELIMITER //
+
+CREATE TRIGGER trg_Sequential_Performances_Per_Event
+BEFORE INSERT ON Performance
+FOR EACH ROW
+BEGIN
+  DECLARE last_end DATETIME;
+
+  -- Βρες τη λήξη της τελευταίας performance του event (αν υπάρχει)
+  SELECT MAX(ADDTIME(StartTime, SEC_TO_TIME(Duration * 60))) INTO last_end
+  FROM Performance
+  WHERE Event_Event_id = NEW.Event_Event_id;
+
+  -- Αν υπάρχει προηγούμενη performance, έλεγξε αν η νέα ξεκινά ακριβώς μόλις τελειώσει
+  IF last_end IS NOT NULL AND NEW.StartTime != last_end THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Performances in an event must be sequential without time gaps.';
+  END IF;
+END;
+//
+
+DELIMITER ;
+
+
+-- === fifo_only_when_sold_out.sql ===
+-- Όταν εξαντλούνται τα εισιτήρια ενεργοποιείται η ουρά fifo
+
+DELIMITER //
+
+CREATE TRIGGER trg_FIFO_Only_When_SoldOut
+BEFORE INSERT ON Visitor_wants_Ticket
+FOR EACH ROW
+BEGIN
+  DECLARE issued_tickets INT;
+  DECLARE max_capacity INT;
+
+  -- Βρες πόσα εισιτήρια έχουν εκδοθεί για το event
+  SELECT COUNT(*) INTO issued_tickets
+  FROM Ticket
+  WHERE Event_Event_id = NEW.Event_id;
+
+  -- Βρες τη μέγιστη χωρητικότητα της σκηνής
+  SELECT s.MaxCapacity INTO max_capacity
+  FROM Event e
+  JOIN Stage s ON e.Stage_Stage_id = s.Stage_id
+  WHERE e.Event_id = NEW.Event_id;
+
+  -- Αν δεν έχει εξαντληθεί η χωρητικότητα, δεν επιτρέπεται είσοδος στην FIFO ουρά
+  IF issued_tickets < max_capacity THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Tickets are still available for this event. You cannot join the FIFO queue yet.';
+  END IF;
+END;
+//
+
+DELIMITER ;
+
+
+-- === resale_only_if_soldout.sql ===
+-- Επιτρέπεται να εμφανιστεί ένας Seller_id στο Ticket μόνο όταν έχουν εξαντληθεί τα εισιτήρια του αντίστοιχου Event
+
+DELIMITER //
+
+CREATE TRIGGER trg_Only_Allow_Resale_When_SoldOut
+BEFORE UPDATE ON Ticket
+FOR EACH ROW
+BEGIN
+  DECLARE issued_tickets INT;
+  DECLARE max_capacity INT;
+
+  -- Αν προστίθεται seller (άρα είναι resale)
+  IF NEW.Seller_id IS NOT NULL AND OLD.Seller_id IS NULL THEN
+
+    -- Βρες πόσα εισιτήρια έχουν εκδοθεί για αυτό το event
+    SELECT COUNT(*) INTO issued_tickets
+    FROM Ticket
+    WHERE Event_Event_id = NEW.Event_Event_id;
+
+    -- Βρες τη μέγιστη χωρητικότητα της σκηνής
+    SELECT s.MaxCapacity INTO max_capacity
+    FROM Event e
+    JOIN Stage s ON e.Stage_Stage_id = s.Stage_id
+    WHERE e.Event_id = NEW.Event_Event_id;
+
+    -- Αν δεν έχουν εξαντληθεί, μπλόκαρε το resale
+    IF issued_tickets < max_capacity THEN
+      SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'You cannot resell a ticket unless the event is sold out.';
+    END IF;
+  END IF;
+END;
+//
+
+DELIMITER ;
+
+
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
