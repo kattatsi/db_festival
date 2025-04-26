@@ -263,39 +263,30 @@ END;
 
 DELIMITER ;
 
--- === prevent_double_buyer_for_event.sql ===
+-- === visitor_one_ticket_per_event.sql ===
 -- Αποτρέπει αγοραστή να πάρει δεύτερο εισιτήριο για το ίδιο event
-
-
-
 
 DELIMITER //
 
-CREATE TRIGGER prevent_duplicate_buyer_for_event
-BEFORE INSERT ON Buyer_has_Ticket
+CREATE TRIGGER trg_Visitor_One_Ticket_Per_Event
+BEFORE INSERT ON Visitor_wants_Ticket
 FOR EACH ROW
 BEGIN
-  DECLARE event_id INT;
-
-  -- Βρες το event του εισιτηρίου που πάει να αγοραστεί
-  SELECT Event_Event_id INTO event_id
-  FROM Ticket
-  WHERE Ticket_id = NEW.Ticket_Ticket_id;
-
-  -- Έλεγξε αν ο buyer έχει ήδη εισιτήριο για αυτό το event
+  -- Αν ο επισκέπτης έχει ήδη εισιτήριο για το συγκεκριμένο event, μπλοκάρουμε
   IF EXISTS (
     SELECT 1
     FROM Ticket
-    WHERE Visitor_Visitor_id = NEW.Buyer_BuyerVisitor_id
-      AND Event_Event_id = event_id
+    WHERE Visitor_Visitor_id = NEW.Visitor_id
+      AND Event_Event_id = NEW.Event_id
   ) THEN
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Buyer already has a ticket for this event.';
+    SET MESSAGE_TEXT = 'Visitor already owns a ticket for this event.';
   END IF;
 END;
 //
 
 DELIMITER ;
+
 
 -- === rating_only_with_active_ticket.sql ===
 -- Trigger για να επιτρέπει αξιολόγηση μόνο σε επισκέπτες με ενεργοποιημένο εισιτήριο
@@ -580,3 +571,5 @@ DELIMITER ;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+
