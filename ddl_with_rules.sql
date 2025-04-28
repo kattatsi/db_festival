@@ -1379,7 +1379,144 @@ END;
 
 DELIMITER ;
 
+-- όταν πάει να γίνει insert στη resalequeue ελέγχεται αν το θέλει κάποιος βάση event & type και δίνεται αυτόματα με fifo αλλιώς καταχωρείται
 
+DELIMITER $$
+
+CREATE TRIGGER before_resale_queue_insert
+BEFORE INSERT ON ResaleQueue
+FOR EACH ROW
+BEGIN
+    DECLARE v_event_id INT;
+    DECLARE v_ticket_type VARCHAR(45);
+    DECLARE v_current_visitor_id INT;
+    DECLARE v_waiting_visitor_id INT;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_event_id = NULL;
+    
+    -- Get ticket details
+    SELECT t.Event_Event_id, t.Ticket_Type_Type, t.Visitor_Visitor_id
+    INTO v_event_id, v_ticket_type, v_current_visitor_id
+    FROM Ticket t
+    WHERE t.Ticket_id = NEW.Ticket_Ticket_id;
+    
+    -- Αν δεν βρεθεί το εισιτήριο, πετάμε σφάλμα
+    IF v_event_id IS NULL THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Ticket not found.';
+    END IF;
+
+    -- Find the earliest waiting visitor for this event and ticket type
+    SELECT v.Visitor_id
+    INTO v_waiting_visitor_id
+    FROM Visitor_wants_Ticket v
+    WHERE v.Event_id = v_event_id 
+      AND v.Ticket_Type_Type = v_ticket_type
+      AND v.Ticket_id IS NULL
+    ORDER BY v.Timestamp ASC
+    LIMIT 1;
+    
+    -- Αν υπάρχει κάποιος που περιμένει
+    IF v_waiting_visitor_id IS NOT NULL THEN
+        -- Case 1: Assign ticket to waiting visitor
+        UPDATE Ticket
+        SET Visitor_Visitor_id = v_waiting_visitor_id, 
+            Seller_id = NULL
+        WHERE Ticket_id = NEW.Ticket_Ticket_id;
+        
+        -- Remove all waitlist entries for this visitor/event/type
+        DELETE FROM Visitor_wants_Ticket
+        WHERE Visitor_id = v_waiting_visitor_id
+          AND Event_id = v_event_id
+          AND Ticket_Type_Type = v_ticket_type;
+        
+        -- Cancel the resale_queue insertion with SIGNAL
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Ticket assigned directly to waiting visitor. Resale canceled.';
+    ELSE
+        -- Case 2: No one is waiting, proceed with resale queue
+        -- Update the seller info
+        UPDATE Ticket
+        SET Seller_id = v_current_visitor_id
+        WHERE Ticket_id = NEW.Ticket_Ticket_id;
+        
+        -- Ensure entry timestamp is set
+        SET NEW.Timestamp = IFNULL(NEW.Timestamp, NOW());
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- όταν πάει να γίνει insert στο visitor_wants_ticket αν θέλει συγκεκριμένο διαθέσιμο εισητήριο πωλείται, αν θέλει event&type που υπάρχει διαθέσιμο πωλείται αλλιώς καταχωρείται 
+
+DELIMITER //
+CREATE TRIGGER before_visitor_wants_ticket_insert
+BEFORE INSERT ON Visitor_wants_Ticket
+FOR EACH ROW
+BEGIN
+    DECLARE v_ticket_exists INT;
+    DECLARE v_oldest_resale_ticket_id INT;
+    DECLARE v_event_id INT;
+    DECLARE v_ticket_type VARCHAR(50);
+    
+    -- Περίπτωση 1: Θέλει συγκεκριμένο εισιτήριο
+    IF NEW.Ticket_id IS NOT NULL THEN
+        -- Ελέγχουμε αν υπάρχει αυτό το εισιτήριο στη resale_queue
+        SELECT COUNT(*) INTO v_ticket_exists
+        FROM ResaleQueue
+        WHERE Ticket_Ticket_id = NEW.Ticket_id;
+        
+        IF v_ticket_exists = 0 THEN
+            -- Το εισιτήριο δεν είναι διαθέσιμο
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Ticket not available in resale queue';
+        ELSE
+            -- Ενημέρωση εισιτηρίου - δίνουμε στον επισκέπτη
+            UPDATE Ticket
+            SET Visitor_Visitor_id = NEW.Visitor_id,
+                Seller_id = NULL
+            WHERE Ticket_id = NEW.Ticket_id;
+            
+            -- Διαγραφή από resale_queue
+            DELETE FROM ResaleQueue
+            WHERE Ticket_Ticket_id = NEW.Ticket_id;
+            
+            -- Ακύρωση Insert με SIGNAL
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Ticket assigned directly. Insert canceled.';
+        END IF;
+        
+    -- Περίπτωση 2: Ζητάει οποιοδήποτε εισιτήριο για event και type
+    ELSE
+        -- Ψάχνουμε το πιο παλιό εισιτήριο
+        SELECT r.Ticket_Ticket_id INTO v_oldest_resale_ticket_id
+        FROM ResaleQueue r
+        JOIN Ticket t ON r.Ticket_Ticket_id = t.Ticket_id
+        WHERE t.Event_Event_id = NEW.Event_id
+          AND t.Ticket_Type_Type = NEW.Ticket_Type
+        ORDER BY r.Timestamp ASC
+        LIMIT 1;
+        
+        IF v_oldest_resale_ticket_id IS NOT NULL THEN
+            -- Ενημέρωση εισιτηρίου
+            UPDATE Ticket
+            SET Visitor_Visitor_id = NEW.Visitor_id,
+                Seller_id = NULL
+            WHERE Ticket_id = v_oldest_resale_ticket_id;
+            
+            -- Διαγραφή από resale_queue
+            DELETE FROM ResaleQueue
+            WHERE Ticket_Ticket_id = v_oldest_resale_ticket_id;
+            
+            -- Ακύρωση Insert με SIGNAL
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Ticket assigned directly from resale queue. Insert canceled.';
+        ELSE
+            -- Δεν βρέθηκε εισιτήριο, συμπληρώνουμε timestamp αν δεν υπάρχει
+            SET NEW.timestamp = IFNULL(NEW.timestamp, NOW());
+        END IF;
+    END IF;
+END//
+DELIMITER ;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
