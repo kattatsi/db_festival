@@ -50,13 +50,30 @@ LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\Staff.csv' 
 
 LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\Stage.csv' INTO TABLE Stage FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Stage_id, Name, Description, MaxCapacity);
 
-LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\Ticket_type.csv' INTO TABLE Ticket_type FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Type);
+-- LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\Ticket_type.csv' INTO TABLE Ticket_type FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Type);
+INSERT IGNORE INTO Ticket_type (Type)
+VALUES 
+  ('Backstage'),
+  ('Early Bird'),
+  ('Group'),
+  ('Regular'),
+  ('VIP');
+
 
 LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\Visitor.csv' INTO TABLE Visitor FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Visitor_id, Name, Age, ContactInfo);
 
 LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\genre.csv' INTO TABLE Genre FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Genre_id);
 
-LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\payment_method.csv' INTO TABLE Payment_method FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Method);
+-- LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\payment_method.csv' INTO TABLE Payment_method FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Method);
+INSERT IGNORE INTO Payment_method (Method)
+VALUES 
+  ('Cash'),
+  ('Credit Card'),
+  ('Debit Card'),
+  ('Bank Account'),
+  ('No Cash'),
+  ('');
+
 
 LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\Subgenre.csv' INTO TABLE Subgenre FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Subgenre_id, Genre_Genre_id);
 
@@ -81,9 +98,11 @@ LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\generated\\
 
 LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\generated\\performance.csv' INTO TABLE Performance FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Performance_id, StartTime, Duration, BreakDuration, Performer_id, Event_Event_id, Performance_type_Type);
 
-LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\generated\\ticket.csv' INTO TABLE Ticket FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Ticket_id, PurchaseDate, Price, EANCode, IsActive, Event_Event_id, Visitor_Visitor_id, Ticket_type_Type, Payment_method_Method, @Seller_id);
-SET Seller_id = NULLIF(@Seller_id, '');
-
+LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\generated\\ticket_only5000.csv' INTO TABLE Ticket FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Ticket_id, PurchaseDate, Price, EANCode, IsActive, Event_Event_id, @Visitor_Visitor_id, Ticket_type_Type, Payment_method_Method, @Seller_id);
+/*SET 
+  Visitor_Visitor_id = NULLIF(@Visitor_Visitor_id, ''),
+  Seller_id = NULLIF(@Seller_id, '');*/
+  
 LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\generated\\Rating.csv' INTO TABLE Rating FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Rating_id, ArtistPerformance, SoundAndLighting, StagePresence, Organization, OverallImpression, Performance_Performance_id, Visitor_Visitor_id);
 
 LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\generated\\buyer_has_ticket.csv' INTO TABLE Buyer_has_Ticket FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (Buyer_BuyerVisitor_id, Ticket_Ticket_id, datetime);

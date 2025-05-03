@@ -41,46 +41,47 @@ END;
 
 DELIMITER ;
 
+/*
 -- === check_vip_limit.sql ===
 -- VIP ≤ 10% χωρητικότητας σκηνής
 
 DELIMITER //
 
-CREATE PROCEDURE check_vip_limit(IN stage_id INT)
-BEGIN
-  DECLARE vip_count INT DEFAULT 0;
-  DECLARE total_capacity INT DEFAULT 0;
-
-  SELECT MaxCapacity INTO total_capacity
-  FROM Stage
-  WHERE Stage_id = stage_id;
-
-  SELECT COUNT(*) INTO vip_count
-  FROM Ticket
-  WHERE Ticket_type = 'VIP' AND Event_Event_id IN (
-    SELECT Event_id FROM Event WHERE Stage_Stage_id = stage_id
-  );
-
-  IF vip_count + 1 > total_capacity * 0.1 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'VIP limit exceeded for this stage!';
-  END IF;
-END;
-//
-
-CREATE TRIGGER vip_check_before_insert
+CREATE TRIGGER trg_limit_vip_tickets
 BEFORE INSERT ON Ticket
 FOR EACH ROW
 BEGIN
+  DECLARE max_capacity INT;
+  DECLARE vip_count INT;
+
+  -- Ελέγχουμε μόνο αν είναι VIP
   IF NEW.Ticket_type_Type = 'VIP' THEN
-    CALL check_vip_limit(
-      (SELECT Stage_Stage_id FROM Event WHERE Event_id = NEW.Event_Event_id)
-    );
+
+    -- Παίρνουμε τη χωρητικότητα της σκηνής για το event
+    SELECT s.MaxCapacity INTO max_capacity
+    FROM Stage s
+    JOIN Event e ON e.Stage_Stage_id = s.Stage_id
+    WHERE e.Event_id = NEW.Event_Event_id
+    LIMIT 1;
+
+    -- Μετράμε πόσα VIP υπάρχουν ήδη για αυτό το event
+    SELECT COUNT(*) INTO vip_count
+    FROM Ticket t
+    WHERE t.Ticket_type_Type = 'VIP' AND t.Event_Event_id = NEW.Event_Event_id;
+
+    -- Αν ξεπερνά το 10% → μπλοκάρουμε
+    IF vip_count + 1 > max_capacity * 0.1 THEN
+      SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'VIP limit exceeded for this event.';
+    END IF;
+
   END IF;
 END;
 //
 
 DELIMITER ;
+*/
+
 
 -- === event_max_duration.sql ===
 -- Κάθε event ≤ 12 ώρες
@@ -228,6 +229,11 @@ END;
 
 DELIMITER ;
 
+
+
+
+
+
 -- === prevent_double_activation.sql ===
 -- Το εισιτήριο ενεργοποιείται όταν σκαναριστεί και δεν μπορεί να ενεργοποιηθεί ξανά
 
@@ -270,7 +276,7 @@ END;
 
 DELIMITER ;
 
-
+/*
 -- === rating_only_with_active_ticket.sql ===
 -- Trigger για να επιτρέπει αξιολόγηση μόνο σε επισκέπτες με ενεργοποιημένο εισιτήριο
 
@@ -284,7 +290,7 @@ FOR EACH ROW
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM Ticket
-    WHERE Visitor_Visitor_id = NEW.Visitor_Visitor_id AND IsActive = TRUE
+    WHERE Visitor_Visitor_id = NEW.Visitor_Visitor_id AND IsActive = 1
   ) THEN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Only visitors with an active ticket can rate a performance.';
@@ -293,6 +299,7 @@ END;
 //
 
 DELIMITER ;
+*/
 
 -- === resale_fifo.sql ===
 ALTER TABLE ResaleQueue
@@ -476,10 +483,11 @@ END;
 //
 DELIMITER ;
 
-
+/*
 -- === unique_eancode.sql ===
 ALTER TABLE Ticket
 ADD CONSTRAINT unique_eancode UNIQUE (EANCode);
+*/
 
 -- === unique_rating_per_visitor_performance.sql ===
 -- Περιορισμός μοναδικότητας αξιολόγησης ανά επισκέπτη και εμφάνιση
@@ -660,6 +668,7 @@ END;
 //
 
 DELIMITER ;
+
 
 
 -- === fifo_only_when_sold_out.sql ===
@@ -876,4 +885,5 @@ DELIMITER ;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
 
