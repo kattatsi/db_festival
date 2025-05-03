@@ -120,11 +120,11 @@ BEGIN
 
     SELECT Date INTO event_date
     FROM Event
-    WHERE Event_Event_id = NEW.Event_Event_id;
+    WHERE Event_id = NEW.Event_Event_id;
 
     SELECT IFNULL(SUM(p.Duration), 0) INTO total_day_duration
     FROM Performance p
-    JOIN Event e ON e.Event_id = p.Event_id
+    JOIN Event e ON e.Event_id = p.Event_Event_id
     WHERE e.Date = event_date;
 
     IF total_day_duration + NEW.Duration > 780 THEN
@@ -145,36 +145,15 @@ CREATE TRIGGER trg_Check_Performance_Break
 BEFORE INSERT ON Performance
 FOR EACH ROW
 BEGIN
-  DECLARE prev_end DATETIME;
-  DECLARE break_minutes INT;
-  DECLARE stage_id INT;
-
-  -- Βρες τη σκηνή του event
-  SELECT Stage_Stage_id INTO stage_id
-  FROM Event
-  WHERE Event_id = NEW.Event_Event_id;
-
-  -- Βρες την ώρα λήξης της προηγούμενης εμφάνισης στη σκηνή
-  SELECT MAX(ADDTIME(StartTime, SEC_TO_TIME(Duration * 60))) INTO prev_end
-  FROM Performance
-  WHERE Event_Event_id IN (
-    SELECT Event_id FROM Event WHERE Stage_Stage_id = stage_id
-  )
-  AND StartTime < NEW.StartTime;
-
-  -- Υπολόγισε το διάστημα από τη λήξη της προηγούμενης
-  IF prev_end IS NOT NULL THEN
-    SET break_minutes = TIMESTAMPDIFF(MINUTE, prev_end, NEW.StartTime);
-
-    IF break_minutes < 5 OR break_minutes > 30 THEN
-      SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Break between performances must be between 5 and 30 minutes.';
-    END IF;
+  IF NEW.BreakDuration < 5 OR NEW.BreakDuration > 30 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'BreakDuration must be between 5 and 30 minutes.';
   END IF;
 END;
 //
 
 DELIMITER ;
+
 
 
 -- === performance_max_duration.sql ===
@@ -220,26 +199,30 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE TRIGGER trg_Check_Performer_3_Years
+CREATE TRIGGER trg_Limit_Performer_3_Consecutive_Years
 BEFORE INSERT ON Performance
 FOR EACH ROW
 BEGIN
-    DECLARE participation_years INT;
+  DECLARE y INT;
+  DECLARE count_consec INT;
 
-    -- Μετράμε σε πόσα ΔΙΑΦΟΡΕΤΙΚΑ έτη έχει ήδη συμμετάσχει ο Performer τα τελευταία 3 χρόνια
-    SELECT COUNT(DISTINCT YEAR(e.Date)) INTO participation_years
-    FROM Performance p
-    JOIN Event e ON e.Event_id = p.Event_Event_id
-    WHERE p.Performer_id = NEW.Performer_id
-      AND YEAR(e.Date) >= YEAR(CURDATE()) - 2  -- τα τελευταία 3 έτη (τρέχον + 2 πίσω)
+  -- Βρίσκουμε το έτος του νέου performance
+  SELECT YEAR(e.Date) INTO y
+  FROM Event e
+  WHERE e.Event_id = NEW.Event_Event_id;
 
-    ;
+  -- Ελέγχουμε αν υπάρχουν performances στα 3 προηγούμενα χρόνια
+  SELECT COUNT(DISTINCT YEAR(e.Date)) INTO count_consec
+  FROM Performance p
+  JOIN Event e ON e.Event_id = p.Event_Event_id
+  WHERE p.Performer_id = NEW.Performer_id
+    AND YEAR(e.Date) IN (y - 1, y - 2, y - 3);
 
-    -- Αν έχει συμμετάσχει ήδη σε 3, δεν επιτρέπεται άλλη εμφάνιση φέτος
-    IF participation_years >= 3 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Performer cannot participate more than 3 consecutive years.';
-    END IF;
+  -- Αν υπάρχουν και φέτος γίνεται η 4η συνεχόμενη χρονιά → μπλοκάρουμε
+  IF count_consec = 3 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Performer cannot participate more than 3 consecutive years.';
+  END IF;
 END;
 //
 
@@ -657,12 +640,18 @@ FOR EACH ROW
 BEGIN
   DECLARE last_end DATETIME;
 
-  -- Βρες τη λήξη της τελευταίας performance του event (αν υπάρχει)
-  SELECT MAX(ADDTIME(StartTime, SEC_TO_TIME(Duration * 60))) INTO last_end
+  -- Βρες τη λήξη της τελευταίας εμφάνισης (δηλ. StartTime + Duration + BreakDuration)
+  SELECT MAX(
+      ADDTIME(
+        ADDTIME(StartTime, SEC_TO_TIME(Duration * 60)),
+        SEC_TO_TIME(BreakDuration * 60)
+      )
+    )
+  INTO last_end
   FROM Performance
   WHERE Event_Event_id = NEW.Event_Event_id;
 
-  -- Αν υπάρχει προηγούμενη performance, έλεγξε αν η νέα ξεκινά ακριβώς μόλις τελειώσει
+  -- Έλεγξε αν η νέα StartTime είναι ακριβώς συνέχεια
   IF last_end IS NOT NULL AND NEW.StartTime != last_end THEN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Performances in an event must be sequential without time gaps.';
@@ -743,7 +732,6 @@ END;
 //
 
 DELIMITER ;
-
 
 -- όταν πάει να γίνει insert στη resalequeue ελέγχεται αν το θέλει κάποιος βάση event & type και δίνεται αυτόματα με fifo αλλιώς καταχωρείται
 
@@ -885,9 +873,7 @@ END//
 DELIMITER ;
 
 
-
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
 
