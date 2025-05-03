@@ -350,7 +350,7 @@ BEGIN
   FROM Event_has_Staff EHS
   JOIN Staff S ON EHS.Staff_Staff_id = S.Staff_id
   WHERE EHS.Event_Event_id = NEW.Event_Event_id
-    AND S.Role_Name = 'Security';
+    AND (S.Role_Name = 'Security' OR S.Role_Name = 'First Aid Responder' OR S.Role_Name = 'Parking Attendant');
 
   IF current_security < required_security THEN
     SIGNAL SQLSTATE '45000'
@@ -443,7 +443,8 @@ BEGIN
   FROM Event_has_Staff EHS
   JOIN Staff S ON EHS.Staff_Staff_id = S.Staff_id
   WHERE EHS.Event_Event_id = NEW.Event_Event_id
-    AND S.Role_Name = 'Support';
+    AND (S.Role_Name = 'Support' OR  S.Role_Name = 'Stage Manager' OR S.Role_Name = 'Vendor Coordinator' OR S.Role_Name = 'Ticket Scanner'
+                 OR S.Role_Name = 'Artist Liaison' OR S.Role_Name = 'Cleanup Crew');
 
   IF current_support < required_support THEN
     SIGNAL SQLSTATE '45000'
