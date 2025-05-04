@@ -1,13 +1,12 @@
--- Υποθέτουμε Artist_id = 12 (αλλαγή αν θέλουμε)
+-- Υποθέτουμε Performer_id = 9
 
 SELECT 
-  A.Artist_id,
-  A.Name,
+  P.Performer_id,
+  P.Name,
   ROUND(AVG(R.ArtistPerformance), 2) AS AvgArtistPerformance,
   ROUND(AVG(R.OverallImpression), 2) AS AvgOverallImpression
-FROM Artist A
-JOIN Artist_has_Performer AP ON A.Artist_id = AP.Artist_Artist_id
-JOIN Performance P ON AP.Performer_Performer_id = P.Performer_id
-JOIN Rating R ON R.Performance_Performance_id = P.Performance_id
-WHERE A.Artist_id = 12
-GROUP BY A.Artist_id;
+FROM Performer P
+JOIN Performance PF ON P.Performer_id = PF.Performer_id
+JOIN Rating R ON R.Performance_Performance_id = PF.Performance_id
+WHERE P.Performer_id = 9
+GROUP BY P.Performer_id;
