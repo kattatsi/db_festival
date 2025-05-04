@@ -330,13 +330,13 @@ INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `In
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (18, 'Timothy Green', '2016-05-23', 'http://timothygreen.com', 'https://instagram.com/timothygreen');
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (19, 'Gary Campbell', '2019-10-27', 'http://garycampbell.com', 'https://instagram.com/garycampbell');
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (20, 'Christina Roberts', '2022-11-17', 'http://christinaroberts.com', 'https://instagram.com/christinaroberts');
-INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (21, 'John Smith', '2017-05-26', 'http://johnsmith.com', 'https://instagram.com/johnsmith');
+INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (21, 'John Smith', '1999-05-26', 'http://johnsmith.com', 'https://instagram.com/johnsmith');
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (22, 'Brittany Phillips', '2021-01-13', 'http://brittanyphillips.com', 'https://instagram.com/brittanyphillips');
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (23, 'Lisa Garcia', '2017-12-12', 'http://lisagarcia.com', 'https://instagram.com/lisagarcia');
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (24, 'Amanda Thomas', '2023-01-29', 'http://amandathomas.com', 'https://instagram.com/amandathomas');
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (25, 'Jeffrey Evans', '2019-05-27', 'http://jeffreyevans.com', 'https://instagram.com/jeffreyevans');
-INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (26, 'Emily Johnson', '2019-06-17', 'http://emilyjohnson.com', 'https://instagram.com/emilyjohnson');
-INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (27, 'Michael Williams', '2021-10-07', 'http://michaelwilliams.com', 'https://instagram.com/michaelwilliams');
+INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (26, 'Emily Johnson', '2000-06-17', 'http://emilyjohnson.com', 'https://instagram.com/emilyjohnson');
+INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (27, 'Michael Williams', '1998-10-07', 'http://michaelwilliams.com', 'https://instagram.com/michaelwilliams');
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (28, 'Danielle Parker', '2022-07-30', 'http://danielleparker.com', 'https://instagram.com/danielleparker');
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (29, 'Samantha Scott', '2017-02-10', 'http://samanthascott.com', 'https://instagram.com/samanthascott');
 INSERT INTO `performer` (`Performer_id`, `Name`, `FormationDate`, `Website`, `InstagramProfile`) VALUES (30, 'Brandon Morris', '2017-09-09', 'http://brandonmorris.com', 'https://instagram.com/brandonmorris');
@@ -536,11 +536,11 @@ INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDura
 INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (180, '2028-09-05 13:34:00', 51, 14, 13, 61, 'Special guest');
 INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (181, '2028-09-06 10:00:00', 164, 12, 14, 62, 'Warm up');
 INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (182, '2028-09-06 12:56:00', 109, 25, 36, 62, 'Warm up');
-INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (183, '2028-09-06 15:10:00', 106, 19, 25, 62, 'Warm up');
+INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (183, '2028-09-06 15:10:00', 106, 19, 25, 62, 'DJ set');
 INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (184, '2028-09-06 17:15:00', 125, 24, 26, 62, 'Special guest');
-INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (185, '2028-09-07 10:00:00', 48, 27, 24, 63, 'DJ set');
+INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (185, '2028-09-07 10:00:00', 48, 27, 14, 63, 'Warm up');
 INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (186, '2028-09-07 11:15:00', 112, 17, 2, 63, 'DJ set');
-INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (187, '2028-09-08 10:00:00', 128, 16, 19, 64, 'Warm up');
+INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (187, '2028-09-08 10:00:00', 128, 16, 14, 64, 'Warm up');
 INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (188, '2028-09-08 12:24:00', 35, 29, 21, 64, 'Special guest');
 INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (189, '2028-09-08 13:28:00', 138, 16, 9, 64, 'DJ set');
 INSERT INTO `performance` (`Performance_id`, `StartTime`, `Duration`, `BreakDuration`, `Performer_id`, `Event_Event_id`, `Performance_type_Type`) VALUES (190, '2028-09-09 10:00:00', 133, 22, 12, 65, 'DJ set');
@@ -589,7 +589,7 @@ INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, 
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (13, 'Christopher Jackson', 'ChrisJ', '1984-01-14', 'http://chrisj.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (14, 'Nicole White', 'NWhite', '1989-05-29', 'http://nwhite.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (15, 'Daniel Harris', 'DanH', '1981-03-17', 'http://danh.com', 1);
-INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (16, 'Megan Clark', 'MegC', '1993-08-11', 'http://megc.com', 1);
+INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (16, 'Megan Clark', 'MegC', '2003-08-11', 'http://megc.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (17, 'Anthony Lewis', 'TonyL', '1977-11-23', 'http://tonyl.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (18, 'Elizabeth Walker', 'LizW', '1986-04-05', 'http://lizw.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (19, 'Matthew Hall', 'MattH', '1980-09-18', 'http://matth.com', 1);
@@ -604,7 +604,7 @@ INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, 
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (28, 'Olivia Nelson', 'OliN', '1992-01-15', 'http://olin.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (29, 'Brian Carter', 'BriC', '1981-11-11', 'http://bric.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (30, 'Victoria Mitchell', 'VicM', '1987-04-04', 'http://vicm.com', 1);
-INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (31, 'Jason Perez', 'JayP', '1978-09-09', 'http://jayp.com', 1);
+INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (31, 'Jason Perez', 'JayP', '2001-09-09', 'http://jayp.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (32, 'Christina Roberts', 'ChrisR', '1989-12-25', 'http://chrisr.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (33, 'Ryan Turner', 'RyT', '1980-02-14', 'http://ryt.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (34, 'Brittany Phillips', 'BritP', '1993-07-07', 'http://britp.com', 1);
@@ -613,7 +613,7 @@ INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, 
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (37, 'Jeffrey Evans', 'JeffE', '1977-06-06', 'http://jeffe.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (38, 'Katherine Edwards', 'KateE', '1991-09-09', 'http://katee.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (39, 'Scott Stewart', 'ScotS', '1982-12-12', 'http://scots.com', 1);
-INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (40, 'Alexandra Sanchez', 'AlexS', '1988-05-05', 'http://alexs.com', 1);
+INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (40, 'Alexandra Sanchez', 'AlexS', '2000-05-05', 'http://alexs.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (41, 'Brandon Morris', 'BrandM', '1983-08-08', 'http://brandm.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (42, 'Andrea Rogers', 'AndiR', '1990-11-11', 'http://andir.com', 1);
 INSERT INTO `artist` (`Artist_id`, `Name`, `StageName`, `BirthDate`, `Website`, `Image_Image_id`) VALUES (43, 'Nathan Reed', 'NateR', '1979-04-04', 'http://nater.com', 1);
