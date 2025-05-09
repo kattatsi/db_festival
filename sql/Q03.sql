@@ -4,15 +4,11 @@ SELECT
     f.Festival_id,
     COUNT(*) AS 'Warm Up Performances Count'
 FROM 
-    Performance pf
-JOIN 
-    Performance_type pt ON pf.Performance_type_Type = pt.Type
-JOIN 
-    Event e ON pf.Event_Event_id = e.Event_id
-JOIN 
-    Festival f ON e.Festival_Festival_id = f.Festival_id
-JOIN 
-    Performer p ON pf.Performer_id = p.Performer_id
+    Performance pf USE INDEX (idx_performance_performer_event)
+    JOIN Performance_type pt ON pf.Performance_type_Type = pt.Type
+    JOIN Event e USE INDEX (fk_Event_Festival1_idx) ON pf.Event_Event_id = e.Event_id
+    JOIN Festival f ON e.Festival_Festival_id = f.Festival_id
+    JOIN Performer p ON pf.Performer_id = p.Performer_id
 WHERE 
     pt.Type = 'warm up'
 GROUP BY 

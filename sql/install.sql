@@ -1086,11 +1086,11 @@ DELIMITER ;
 */
 
 
-/*
+
 -- === unique_eancode.sql ===
 ALTER TABLE Ticket
 ADD CONSTRAINT unique_eancode UNIQUE (EANCode);
-*/
+
 
 -- === unique_rating_per_visitor_performance.sql ===
 -- Περιορισμός μοναδικότητας αξιολόγησης ανά επισκέπτη και εμφάνιση
@@ -1159,13 +1159,6 @@ END;
 //
 
 DELIMITER ;
-
--- === unique_festival_year.sql ===
--- Το φεστιβάλ διεξάγεται ετησίως
-
-ALTER TABLE Festival
-ADD CONSTRAINT unique_festival_year
-UNIQUE (Year);
 
 
 -- === consecutive_days.sql ===
@@ -1483,6 +1476,31 @@ BEGIN
     END IF;
 END//
 DELIMITER ;
+
+
+
+-- ======
+-- Δημιουργία ευρετηρίων (indexes) για βελτιστοποίηση των queries
+-- ======
+
+-- Performer_has_Subgenre για πολλαπλά JOINs σε genres
+CREATE INDEX idx_phs_performer_subgenre ON Performer_has_Subgenre(Performer_Performer_id, Subgenre_Subgenre_id);
+
+-- Subgenre με Genre για συνδέσεις προς Genre
+CREATE INDEX idx_subgenre_genre_sub ON Subgenre(Genre_Genre_id, Subgenre_id);
+
+-- Performance για JOIN και filtering σε Performer + Event
+CREATE INDEX idx_performance_performer_event ON Performance(Performer_id, Event_Event_id);
+
+-- Rating με Visitor + Performance (συχνά σε GROUP BY)
+CREATE INDEX idx_rating_visitor_perf ON Rating(Visitor_Visitor_id, Performance_Performance_id);
+
+-- Staff filtering: Role + ID (για πολλαπλά events/ημέρες)
+CREATE INDEX idx_staff_role_staffid ON Staff(Role_Name, Staff_id);
+
+-- Event_has_Staff composite για Q08 (NOT IN, filtering by date)
+CREATE INDEX idx_event_staff ON Event_has_Staff(Staff_Staff_id, Event_Event_id);
+
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

@@ -4,7 +4,7 @@ WITH Performance_Counts AS (
         pf.Name AS Performer_Name,
         COUNT(*) AS Total_Performances
     FROM 
-        Performance p
+        Performance p USE INDEX (idx_performance_performer_event)
     JOIN 
         Performer pf ON p.Performer_id = pf.Performer_id
     GROUP BY 

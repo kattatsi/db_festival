@@ -7,7 +7,7 @@ FROM
 JOIN 
     Performer pf ON p.Performer_id = pf.Performer_id
 JOIN 
-    Event e ON p.Event_Event_id = e.Event_id
+    Event e USE INDEX (fk_Event_Festival1_idx) ON p.Event_Event_id = e.Event_id
 JOIN 
     Festival f ON e.Festival_Festival_id = f.Festival_id
 JOIN 

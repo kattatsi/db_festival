@@ -7,7 +7,7 @@ FROM
 JOIN 
     Visitor v ON r.Visitor_Visitor_id = v.Visitor_id
 JOIN 
-    Performance pf ON r.Performance_Performance_id = pf.Performance_id
+    Performance pf USE INDEX (idx_performance_performer_event) ON r.Performance_Performance_id = pf.Performance_id
 JOIN 
     Performer p ON pf.Performer_id = p.Performer_id
 GROUP BY 

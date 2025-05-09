@@ -14,7 +14,7 @@ FROM (
     JOIN 
         Event e ON t.Event_Event_id = e.Event_id
     JOIN 
-        Performance p ON e.Event_id = p.Event_Event_id
+        Performance p USE INDEX (idx_performance_performer_event) ON e.Event_id = p.Event_Event_id
     WHERE 
         t.IsActive = TRUE
     GROUP BY 

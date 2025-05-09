@@ -4,12 +4,9 @@ SELECT
     SUM(t.Price) AS 'Total Revenue'
 FROM 
     Ticket t
-JOIN 
-    Event e ON t.Event_Event_id = e.Event_id
-JOIN 
-    Festival f ON e.Festival_Festival_id = f.Festival_id
-JOIN 
-    Payment_method pm ON t.Payment_method_Method = pm.Method
+    JOIN Event e USE INDEX (fk_Event_Festival1_idx) ON t.Event_Event_id = e.Event_id
+    JOIN Festival f ON e.Festival_Festival_id = f.Festival_id
+    JOIN Payment_method pm ON t.Payment_method_Method = pm.Method
 WHERE 
     t.Visitor_Visitor_id IS NOT NULL
 GROUP BY 

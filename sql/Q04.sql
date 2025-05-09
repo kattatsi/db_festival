@@ -3,10 +3,17 @@
 SELECT 
   P.Performer_id,
   P.Name,
-  ROUND(AVG(R.ArtistPerformance), 2) AS AvgArtistPerformance,
-  ROUND(AVG(R.OverallImpression), 2) AS AvgOverallImpression
+  ROUND((
+    SELECT AVG(R1.ArtistPerformance)
+    FROM Rating R1
+    JOIN Performance PF1 ON PF1.Performance_id = R1.Performance_Performance_id
+    WHERE PF1.Performer_id = P.Performer_id
+  ), 2) AS AvgArtistPerformance,
+  ROUND((
+    SELECT AVG(R2.OverallImpression)
+    FROM Rating R2
+    JOIN Performance PF2 ON PF2.Performance_id = R2.Performance_Performance_id
+    WHERE PF2.Performer_id = P.Performer_id
+  ), 2) AS AvgOverallImpression
 FROM Performer P
-JOIN Performance PF ON P.Performer_id = PF.Performer_id
-JOIN Rating R ON R.Performance_Performance_id = PF.Performance_id
-WHERE P.Performer_id = 9
-GROUP BY P.Performer_id;
+WHERE P.Performer_id = 9;

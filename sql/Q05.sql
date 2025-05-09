@@ -47,7 +47,7 @@ Performer_Counts AS (
     FROM 
         Young_Performers yp
     JOIN 
-        Performance perf ON yp.Performer_id = perf.Performer_id
+        Performance perf USE INDEX (idx_performance_performer_event) ON yp.Performer_id = perf.Performer_id
     GROUP BY 
         yp.Performer_id, yp.Name, yp.Age
 )
