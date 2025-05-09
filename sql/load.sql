@@ -18113,3 +18113,6 @@ INSERT INTO `stage_has_equipment` (`Stage_Stage_id`, `Equipment_Name`, `Quantity
 INSERT INTO `stage_has_equipment` (`Stage_Stage_id`, `Equipment_Name`, `Quantity`) VALUES (40, 'Power Generator', 4);
 INSERT INTO `stage_has_equipment` (`Stage_Stage_id`, `Equipment_Name`, `Quantity`) VALUES (40, 'Wireless Transmitter', 3);
 SET FOREIGN_KEY_CHECKS=1;
+
+CALL CheckSecurityCoverageByStage();
+CALL CheckSupportCoverageByStage();

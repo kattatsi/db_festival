@@ -1040,8 +1040,6 @@ DELIMITER ;
 
 /*
 -- === support_min_2percent_audience.sql ===
--- Το βοηθητικό προσωπικό πρέπει να καλύπτει τουλάχιστον το 2% του συνολικού αριθμού θεατών σε κάθε σκηνή
-
 -- Το βοηθητικό προσωπικό πρέπει να καλύπτει τουλάχιστον το 2% του ενεργού κοινού για κάθε σκηνή
 
 DELIMITER //
@@ -1476,6 +1474,87 @@ BEGIN
     END IF;
 END//
 DELIMITER ;
+
+
+-- === security_min_5percent_audience.sql ===
+-- Το προσωπικό ασφαλείας πρέπει να καλύπτει τουλάχιστον το 5% του ενεργού κοινού σε κάθε σκηνή
+
+DELIMITER //
+
+CREATE PROCEDURE CheckSecurityCoverageByStage()
+BEGIN
+  DROP TEMPORARY TABLE IF EXISTS SecurityViolations;
+
+  CREATE TEMPORARY TABLE SecurityViolations (
+    stage_id INT,
+    event_date DATE,
+    audience_count INT,
+    security_count INT,
+    required_min_security INT
+  );
+
+  INSERT INTO SecurityViolations(stage_id, event_date, audience_count, security_count, required_min_security)
+  SELECT 
+    e.Stage_Stage_id,
+    e.Date,
+    COUNT(DISTINCT t.Ticket_id) AS audience_count,
+    COUNT(DISTINCT s.Staff_id) AS security_count,
+    CEIL(COUNT(DISTINCT t.Ticket_id) * 0.05) AS required_min_security
+  FROM Event e
+    JOIN Ticket t ON t.Event_Event_id = e.Event_id
+    JOIN Event_has_Staff es ON es.Event_Event_id = e.Event_id
+    JOIN Staff s ON s.Staff_id = es.Staff_Staff_id
+  WHERE t.IsActive = TRUE
+    AND s.Role_Name IN ('Security', 'First Aid Responder')
+  GROUP BY e.Stage_Stage_id, e.Date
+  HAVING security_count < CEIL(COUNT(DISTINCT t.Ticket_id) * 0.05);
+
+  -- Δείξε τα αποτελέσματα
+  SELECT * FROM SecurityViolations;
+END //
+
+DELIMITER ;
+
+
+
+-- === support_min_2percent_audience.sql ===
+-- Το βοηθητικό προσωπικό πρέπει να καλύπτει τουλάχιστον το 2% του ενεργού κοινού για κάθε σκηνή
+
+DELIMITER //
+
+CREATE PROCEDURE CheckSupportCoverageByStage()
+BEGIN
+  DROP TEMPORARY TABLE IF EXISTS SupportViolations;
+
+  CREATE TEMPORARY TABLE SupportViolations (
+    stage_id INT,
+    event_date DATE,
+    audience_count INT,
+    support_count INT,
+    required_min_support INT
+  );
+
+  INSERT INTO SupportViolations(stage_id, event_date, audience_count, support_count, required_min_support)
+  SELECT 
+    e.Stage_Stage_id,
+    e.Date,
+    COUNT(DISTINCT t.Ticket_id) AS audience_count,
+    COUNT(DISTINCT s.Staff_id) AS support_count,
+    CEIL(COUNT(DISTINCT t.Ticket_id) * 0.02) AS required_min_support
+  FROM Event e
+    JOIN Ticket t ON t.Event_Event_id = e.Event_id
+    JOIN Event_has_Staff es ON es.Event_Event_id = e.Event_id
+    JOIN Staff s ON s.Staff_id = es.Staff_Staff_id
+  WHERE t.IsActive = TRUE
+    AND s.Role_Name IN ('Artist Liaison', 'Cleanup Crew', 'Ticket Scanner', 'Vendor Coordinator', 'Parking Attendant')
+  GROUP BY e.Stage_Stage_id, e.Date
+  HAVING support_count < CEIL(COUNT(DISTINCT t.Ticket_id) * 0.02);
+
+  SELECT * FROM SupportViolations;
+END //
+
+DELIMITER ;
+
 
 
 
