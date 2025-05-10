@@ -1,4 +1,4 @@
--- CTE για solo καλλιτέχνες (όσοι Performer εμφανίζονται μόνο μία φορά στον πίνακα Artist_has_Performer)
+-- solo καλλιτέχνες (όσοι Performer εμφανίζονται μόνο μία φορά στον πίνακα Artist_has_Performer)
 WITH Solo_Artists AS (
     SELECT 
         ahp.Performer_Performer_id AS Performer_id,
@@ -16,7 +16,7 @@ WITH Solo_Artists AS (
         )
 ),
 
--- CTE για performers κάτω των 30 ετών, με σωστό υπολογισμό ηλικίας ανάλογα αν είναι solo ή συγκρότημα
+--  performers κάτω των 30 ετών, με υπολογισμό ηλικίας ανάλογα αν είναι solo ή συγκρότημα
 Young_Performers AS (
     SELECT 
         p.Performer_id,
@@ -37,7 +37,6 @@ Young_Performers AS (
         )
 ),
 
--- Τελικός πίνακας με καταμέτρηση συμμετοχών
 Performer_Counts AS (
     SELECT 
         yp.Performer_id,
@@ -52,7 +51,6 @@ Performer_Counts AS (
         yp.Performer_id, yp.Name, yp.Age
 )
 
--- Προβολή σε μορφή leaderboard με ranking
 SELECT 
     RANK() OVER (ORDER BY `Performance Count` DESC) AS `Rank`,
     `Performer Name`,

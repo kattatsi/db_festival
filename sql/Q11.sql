@@ -33,6 +33,6 @@ CROSS JOIN
     Top_Performer tp
 WHERE 
     (tp.Total_Performances - pc.Total_Performances) >= 5
-    AND pc.Performer_id != tp.Performer_id  -- Εξαιρεί τον ίδιο τον top καλλιτέχνη
+    AND pc.Performer_id != tp.Performer_id 
 ORDER BY 
     pc.Total_Performances DESC;

@@ -25,4 +25,4 @@ FROM (
 GROUP BY 
     vc.Year, vc.Performance_Count
 ORDER BY 
-    vc.Performance_Count DESC, vc.Year;
+    vc.Year, vc.Performance_Count DESC;
