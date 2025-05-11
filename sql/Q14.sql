@@ -5,10 +5,10 @@ WITH GenreYearCounts AS (
     COUNT(*) AS AppearanceCount
   FROM Performance P
   JOIN Performer PR ON P.Performer_id = PR.Performer_id
-  JOIN Performer_has_Subgenre PS FORCE INDEX (idx_phs_performer_subgenre) ON PR.Performer_id = PS.Performer_Performer_id
-  JOIN Subgenre S FORCE INDEX (idx_subgenre_genre_sub) ON PS.Subgenre_Subgenre_id = S.Subgenre_id
+  JOIN Performer_has_Subgenre PS ON PR.Performer_id = PS.Performer_Performer_id
+  JOIN Subgenre S ON PS.Subgenre_Subgenre_id = S.Subgenre_id
   JOIN Genre G ON S.Genre_Genre_id = G.Genre_id
-  JOIN Event E USE INDEX (fk_Event_Festival1_idx) ON P.Event_Event_id = E.Event_id
+  JOIN Event E ON P.Event_Event_id = E.Event_id
   JOIN Festival F ON E.Festival_Festival_id = F.Festival_id
   GROUP BY G.Genre_id, F.Year
 )
@@ -17,9 +17,7 @@ SELECT
   g1.Genre_id AS Genre,
   g1.Year AS 'First Year',
   g2.Year AS 'Second Year',
-  g1.AppearanceCount AS 'Appearances of First Year',
-  g2.AppearanceCount AS 'Appearances of Second Year',
-  g1.AppearanceCount + g2.AppearanceCount AS 'Total Appearances in both years'
+  g1.AppearanceCount AS 'Appearances each Year'
 FROM GenreYearCounts g1
 JOIN GenreYearCounts g2 ON g1.Genre_id = g2.Genre_id AND g2.Year = g1.Year + 1
 WHERE g1.AppearanceCount = g2.AppearanceCount AND g1.AppearanceCount >= 3;

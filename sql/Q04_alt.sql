@@ -4,8 +4,8 @@
 SELECT 
   P.Performer_id,
   P.Name,
-  ROUND(AVG(R.ArtistPerformance), 2) AS AvgArtistPerformance,
-  ROUND(AVG(R.OverallImpression), 2) AS AvgOverallImpression
+  ROUND(AVG(R.ArtistPerformance), 2) AS 'Average Artist Performance',
+  ROUND(AVG(R.OverallImpression), 2) AS 'Average Overall Impression'
 FROM Performer P
 JOIN Performance PF FORCE INDEX (fk_Performance_Band1_idx) 
   ON P.Performer_id = PF.Performer_id
