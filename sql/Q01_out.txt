@@ -1,0 +1,36 @@
+Year,"Payment Method","Total Revenue"
+2024,"Credit Card",15116.00
+2024,"Bank Account",15016.00
+2024,"Debit Card",14164.00
+2024,Cash,13930.00
+2024,"No Cash",12582.00
+2023,"No Cash",13881.00
+2023,"Bank Account",11387.00
+2023,"Credit Card",11315.00
+2023,Cash,10612.00
+2023,"Debit Card",10062.00
+2022,"Credit Card",14702.00
+2022,"Bank Account",14538.00
+2022,"No Cash",14306.00
+2022,Cash,13503.00
+2022,"Debit Card",12961.00
+2021,"Debit Card",15543.00
+2021,"Bank Account",13543.00
+2021,"No Cash",12798.00
+2021,Cash,12205.00
+2021,"Credit Card",11424.00
+2020,Cash,14907.00
+2020,"No Cash",13494.00
+2020,"Debit Card",13251.00
+2020,"Credit Card",12983.00
+2020,"Bank Account",11631.00
+2019,"Bank Account",15981.00
+2019,"No Cash",14516.00
+2019,Cash,13815.00
+2019,"Debit Card",12869.00
+2019,"Credit Card",12032.00
+2018,Cash,13438.00
+2018,"Credit Card",13413.00
+2018,"Debit Card",13335.00
+2018,"Bank Account",12840.00
+2018,"No Cash",12592.00

@@ -1,0 +1,6 @@
+Visitor_Name,Performer_Name,Total_Score
+"Lisa Thomas",Nova,36
+"Luke Mcdonald","Daniel Harris",29
+"James Lee","Andrea Rogers",28
+"Glenn Stephens","Jason Perez",28
+"Daniel Anderson","Lisa Garcia",28

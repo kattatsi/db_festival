@@ -1,0 +1,12 @@
+Genre,"First Year","Second Year","Appearances each Year"
+Classical,2021,2022,7
+Reggae,2021,2022,7
+Reggae,2020,2021,7
+Hip-Hop,2020,2021,11
+Reggae,2024,2025,7
+Pop,2023,2024,7
+Electronic,2019,2020,6
+Electronic,2020,2021,6
+Jazz,2024,2025,8
+Jazz,2028,2029,18
+Jazz,2021,2022,8

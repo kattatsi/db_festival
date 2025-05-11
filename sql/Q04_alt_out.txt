@@ -1,0 +1,2 @@
+Performer_id,Name,"Average Artist Performance","Average Overall Impression"
+9,"Christopher Jackson",2.86,2.51

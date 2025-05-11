@@ -1,0 +1,29 @@
+Performer_id,Performer_Name,Total_Performances
+3,"Tiffany Bell",6
+5,"Ethan Rivera",6
+8,"Lauren Allen",6
+11,"Katherine Edwards",6
+14,"Andrea Rogers",6
+18,"Timothy Green",6
+26,"Emily Johnson",6
+30,"Brandon Morris",6
+34,"Daniel Harris",6
+7,"Hannah Adams",5
+15,"Kayla Bailey",5
+19,"Gary Campbell",5
+28,"Danielle Parker",5
+31,"Natalie Cooper",5
+32,"Kevin Young",5
+37,Electric,5
+39,Bliss,5
+1,"Alexandra Sanchez",4
+6,"Patrick Baker",4
+12,"Sarah Brown",4
+23,"Lisa Garcia",4
+33,"Jennifer Davis",4
+2,"Jason Perez",3
+4,"Elizabeth Walker",3
+16,"Megan Clark",3
+20,"Christina Roberts",3
+22,"Brittany Phillips",3
+27,"Michael Williams",3

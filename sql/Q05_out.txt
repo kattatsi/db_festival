@@ -1,0 +1,8 @@
+Rank,"Performer Name",Age,"Performance Count"
+1,Nova,6,10
+2,Jungle,4,9
+3,"Natalie Cooper",29,5
+3,Electric,11,5
+5,"Alexandra Sanchez",25,4
+6,"Jason Perez",23,3
+6,"Megan Clark",21,3

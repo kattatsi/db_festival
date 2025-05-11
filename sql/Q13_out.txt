@@ -1,0 +1,28 @@
+Performer_id,Performer_Name,Continent_Count
+24,"Amanda Thomas",4
+38,Jungle,4
+18,"Timothy Green",4
+1,"Alexandra Sanchez",3
+39,Bliss,3
+30,"Brandon Morris",3
+35,"Brian Carter",3
+20,"Christina Roberts",3
+9,"Christopher Jackson",3
+34,"Daniel Harris",3
+28,"Danielle Parker",3
+10,"David Jones",3
+26,"Emily Johnson",3
+5,"Ethan Rivera",3
+7,"Hannah Adams",3
+13,"James Martinez",3
+25,"Jeffrey Evans",3
+17,"Jessica Wilson",3
+21,"John Smith",3
+15,"Kayla Bailey",3
+32,"Kevin Young",3
+23,"Lisa Garcia",3
+16,"Megan Clark",3
+36,Nova,3
+6,"Patrick Baker",3
+12,"Sarah Brown",3
+3,"Tiffany Bell",3

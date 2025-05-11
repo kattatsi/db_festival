@@ -1,0 +1,19 @@
+Performer_id,"Performer Name",Genre,"Participated In Festival 2024"
+1,"Alexandra Sanchez",Rock,No
+2,"Jason Perez",Rock,No
+6,"Patrick Baker",Rock,No
+7,"Hannah Adams",Rock,Yes
+8,"Lauren Allen",Rock,No
+11,"Katherine Edwards",Rock,No
+13,"James Martinez",Rock,Yes
+15,"Kayla Bailey",Rock,No
+18,"Timothy Green",Rock,Yes
+21,"John Smith",Rock,No
+22,"Brittany Phillips",Rock,No
+24,"Amanda Thomas",Rock,Yes
+28,"Danielle Parker",Rock,No
+31,"Natalie Cooper",Rock,No
+34,"Daniel Harris",Rock,Yes
+35,"Brian Carter",Rock,No
+36,Nova,Rock,Yes
+37,Electric,Rock,No
