@@ -18116,3 +18116,4 @@ SET FOREIGN_KEY_CHECKS=1;
 
 CALL CheckSecurityCoverageByStage();
 CALL CheckSupportCoverageByStage();
+CALL CheckVipLimitPerEvent();

@@ -635,10 +635,7 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 
 
--- === INTEGRATED RULES ===
-
--- === FULL DDL INCLUDING ALL 21 RULES ===
--- Generated automatically
+-- === RULES ===
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
@@ -677,47 +674,6 @@ END;
 //
 
 DELIMITER ;
-
-/*
--- === check_vip_limit.sql ===
--- VIP ≤ 10% χωρητικότητας σκηνής
-
-DELIMITER //
-
-CREATE TRIGGER trg_limit_vip_tickets
-BEFORE INSERT ON Ticket
-FOR EACH ROW
-BEGIN
-  DECLARE max_capacity INT;
-  DECLARE vip_count INT;
-
-  -- Ελέγχουμε μόνο αν είναι VIP
-  IF NEW.Ticket_type_Type = 'VIP' THEN
-
-    -- Παίρνουμε τη χωρητικότητα της σκηνής για το event
-    SELECT s.MaxCapacity INTO max_capacity
-    FROM Stage s
-    JOIN Event e ON e.Stage_Stage_id = s.Stage_id
-    WHERE e.Event_id = NEW.Event_Event_id
-    LIMIT 1;
-
-    -- Μετράμε πόσα VIP υπάρχουν ήδη για αυτό το event
-    SELECT COUNT(*) INTO vip_count
-    FROM Ticket t
-    WHERE t.Ticket_type_Type = 'VIP' AND t.Event_Event_id = NEW.Event_Event_id;
-
-    -- Αν ξεπερνά το 10% → μπλοκάρουμε
-    IF vip_count + 1 > max_capacity * 0.1 THEN
-      SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'VIP limit exceeded for this event.';
-    END IF;
-
-  END IF;
-END;
-//
-
-DELIMITER ;
-*/
 
 
 -- === event_max_duration.sql ===
@@ -867,10 +823,6 @@ END;
 DELIMITER ;
 
 
-
-
-
-
 -- === prevent_double_activation.sql ===
 -- Το εισιτήριο ενεργοποιείται όταν σκαναριστεί και δεν μπορεί να ενεργοποιηθεί ξανά
 
@@ -913,7 +865,7 @@ END;
 
 DELIMITER ;
 
-/*
+
 -- === rating_only_with_active_ticket.sql ===
 -- Trigger για να επιτρέπει αξιολόγηση μόνο σε επισκέπτες με ενεργοποιημένο εισιτήριο
 
@@ -936,7 +888,7 @@ END;
 //
 
 DELIMITER ;
-*/
+
 
 -- === resale_fifo.sql ===
 ALTER TABLE ResaleQueue
@@ -944,7 +896,6 @@ MODIFY COLUMN timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 -- === resale_only_inactive_tickets.sql ===
 -- Μπλοκάρει resale αν το εισιτήριο είναι ενεργό
-
 
 DELIMITER //
 
@@ -963,126 +914,6 @@ END;
 //
 
 DELIMITER ;
-
-
-/*
--- === security_min_5percent_audience.sql ===
--- Το προσωπικό ασφαλείας πρέπει να καλύπτει τουλάχιστον το 5% του συνολικού αριθμού θεατών σε κάθε σκηνή
-
-DELIMITER //
-
-CREATE TRIGGER trg_Check_Minimum_Support_Staff
-BEFORE INSERT ON event_has_staff
-FOR EACH ROW
-BEGIN
-  DECLARE total_audience INT;
-  DECLARE staff_count INT;
-  DECLARE required_min INT;
-
-  -- Υπολογίζει τον αριθμό ενεργών θεατών για το συγκεκριμένο event
-  SELECT COUNT(*) INTO total_audience
-  FROM Ticket
-  WHERE Event_Event_id = NEW.Event_Event_id;
-
-  -- Υπολογίζει τον αριθμό staff με αποδεκτούς ρόλους για το event
-  SELECT COUNT(*) INTO staff_count
-  FROM event_has_staff ehs
-  JOIN Staff s ON ehs.Staff_Staff_id = s.Staff_id
-  WHERE ehs.Event_Event_id = NEW.Event_Event_id
-    AND s.Role_Name IN (
-      'Security',
-      'First Aid Responder',
-      'Stage Manager',
-      'Parking Attendant'
-    );
-
-  -- Υπολογίζει το 5% του κοινού (πάντα στρογγυλοποιημένο προς τα πάνω)
-  SET required_min = CEIL(total_audience * 0.05);
-
-  -- Έλεγχος: αν το προσωπικό είναι λιγότερο από το απαιτούμενο
-  IF staff_count < required_min THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'At least 5% of audience must be covered by security staff.';
-  END IF;
-END;
-//
-
-DELIMITER ;
-*/
-
-
--- === seller_is_owner.sql ===
-DELIMITER //
-
-CREATE TRIGGER check_resale_seller_is_owner
-BEFORE INSERT ON ResaleQueue
-FOR EACH ROW
-BEGIN
-  DECLARE original_owner_id INT;
-
-  -- Βρες τον αρχικό κάτοχο (visitor) αυτού του ticket μέσω Seller
-  SELECT V.Visitor_id INTO original_owner_id
-  FROM Ticket T
-  JOIN Seller S ON T.Seller_Seller_id = S.Seller_id
-  JOIN Visitor V ON S.Visitor_Visitor_id = V.Visitor_id
-  WHERE T.Ticket_id = NEW.Ticket_Ticket_id;
-
-  -- Εφόσον δεν έχεις Visitor στην ResaleQueue, το μπλοκάρεις μόνο αν δεν υπάρχει αυτό το mapping
-  IF original_owner_id IS NULL THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Cannot determine original owner of ticket.';
-  END IF;
-END;
-//
-
-DELIMITER ;
-
-
-/*
--- === support_min_2percent_audience.sql ===
--- Το βοηθητικό προσωπικό πρέπει να καλύπτει τουλάχιστον το 2% του ενεργού κοινού για κάθε σκηνή
-
-DELIMITER //
-
-CREATE TRIGGER trg_Check_Minimum_Support_Staff_2percent
-BEFORE INSERT ON event_has_staff
-FOR EACH ROW
-BEGIN
-  DECLARE total_audience INT;
-  DECLARE support_count INT;
-  DECLARE required_min INT;
-
-  -- Υπολογισμός ενεργών θεατών για το συγκεκριμένο event
-  SELECT COUNT(*) INTO total_audience
-  FROM Ticket
-  WHERE Event_Event_id = NEW.Event_Event_id;
-
-  -- Υπολογισμός προσωπικού με συγκεκριμένους υποστηρικτικούς ρόλους
-  SELECT COUNT(*) INTO support_count
-  FROM event_has_staff ehs
-  JOIN Staff s ON ehs.Staff_Staff_id = s.Staff_id
-  WHERE ehs.Event_Event_id = NEW.Event_Event_id
-    AND s.Role_Name IN (
-      'Artist Liaison',
-      'Cleanup Crew',
-      'Ticket Scanner',
-      'Vendor Coordinator'
-    );
-
-  -- Υπολογισμός απαιτούμενου ελάχιστου αριθμού (2% του κοινού)
-  SET required_min = CEIL(total_audience * 0.02);
-
-  -- Έλεγχος
-  IF support_count < required_min THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'At least 2% of audience must be covered by support staff.';
-  END IF;
-END;
-//
-
-DELIMITER ;
-*/
-
 
 
 -- === unique_eancode.sql ===
@@ -1129,7 +960,7 @@ BEGIN
   WHERE Staff_id = NEW.Staff_Staff_id;
 
   -- Μόνο για τεχνικούς εφαρμόζεται αυτός ο περιορισμός
-  IF staff_role = 'Technician' THEN
+  IF staff_role IN ('Sound Engineer', 'Lighting Technician', 'Stage Manager') THEN
 
     -- Βρες την ημερομηνία του event που πάει να ανατεθεί
     SELECT Date INTO performance_date
@@ -1141,7 +972,7 @@ BEGIN
     FROM Event_has_Staff es
     JOIN Event e ON es.Event_Event_id = e.Event_id
     JOIN Staff s ON es.Staff_Staff_id = s.Staff_id
-    WHERE s.Role_Name = 'Technician'
+    WHERE s.Role_Name IN ('Sound Engineer', 'Lighting Technician', 'Stage Manager')
       AND es.Staff_Staff_id = NEW.Staff_Staff_id
       AND e.Date = performance_date;
 
@@ -1170,26 +1001,9 @@ CHECK (Days = DATEDIFF(EndDate, StartDate) + 1);
 -- === unique_location_per_year.sql ===
 -- Το φεστιβάλ διεξάγεται ετησίως, σε διαφορετική τοποθεσία ανά έτος
 
-DELIMITER //
+ALTER TABLE Festival
+ADD CONSTRAINT unique_festival_location UNIQUE (Location_Location_id);
 
-CREATE TRIGGER trg_Unique_Location_Per_Year
-BEFORE INSERT ON Festival
-FOR EACH ROW
-BEGIN
-  DECLARE existing_location INT;
-
-  SELECT COUNT(*) INTO existing_location
-  FROM Festival
-  WHERE Year = NEW.Year AND Location_Location_id = NEW.Location_Location_id;
-
-  IF existing_location > 0 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'A festival cannot be held in the same location more than once per year.';
-  END IF;
-END;
-//
-
-DELIMITER ;
 
 -- === stage_event_overlap.sql ===
 -- Κάθε σκηνή μπορεί να φιλοξενεί μόνο μία παράσταση (event) την ίδια στιγμή
@@ -1274,22 +1088,22 @@ CREATE TRIGGER trg_FIFO_Only_When_SoldOut
 BEFORE INSERT ON Visitor_wants_Ticket
 FOR EACH ROW
 BEGIN
-  DECLARE issued_tickets INT;
-  DECLARE max_capacity INT;
+  DECLARE total_tickets INT;
+  DECLARE sold_tickets INT;
 
-  -- Βρες πόσα εισιτήρια έχουν εκδοθεί για το event
-  SELECT COUNT(*) INTO issued_tickets
+  -- Πόσα εισιτήρια υπάρχουν συνολικά για το event
+  SELECT COUNT(*) INTO total_tickets
   FROM Ticket
   WHERE Event_Event_id = NEW.Event_id;
 
-  -- Βρες τη μέγιστη χωρητικότητα της σκηνής
-  SELECT s.MaxCapacity INTO max_capacity
-  FROM Event e
-  JOIN Stage s ON e.Stage_Stage_id = s.Stage_id
-  WHERE e.Event_id = NEW.Event_id;
+  -- Πόσα από αυτά έχουν αγοραστεί (visitor_id is not null)
+  SELECT COUNT(*) INTO sold_tickets
+  FROM Ticket
+  WHERE Event_Event_id = NEW.Event_id
+    AND Visitor_Visitor_id IS NOT NULL;
 
-  -- Αν δεν έχει εξαντληθεί η χωρητικότητα, δεν επιτρέπεται είσοδος στην FIFO ουρά
-  IF issued_tickets < max_capacity THEN
+  -- Αν ΔΕΝ έχουν αγοραστεί όλα, μπλόκαρε την αίτηση
+  IF sold_tickets < total_tickets THEN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Tickets are still available for this event. You cannot join the FIFO queue yet.';
   END IF;
@@ -1299,6 +1113,7 @@ END;
 DELIMITER ;
 
 
+/*
 -- === resale_only_if_soldout.sql ===
 -- Επιτρέπεται να εμφανιστεί ένας Seller_id στο Ticket μόνο όταν έχουν εξαντληθεί τα εισιτήρια του αντίστοιχου Event
 
@@ -1308,25 +1123,25 @@ CREATE TRIGGER trg_Only_Allow_Resale_When_SoldOut
 BEFORE UPDATE ON Ticket
 FOR EACH ROW
 BEGIN
-  DECLARE issued_tickets INT;
-  DECLARE max_capacity INT;
+  DECLARE total_tickets INT;
+  DECLARE sold_tickets INT;
 
   -- Αν προστίθεται seller (άρα είναι resale)
   IF NEW.Seller_id IS NOT NULL AND OLD.Seller_id IS NULL THEN
 
-    -- Βρες πόσα εισιτήρια έχουν εκδοθεί για αυτό το event
-    SELECT COUNT(*) INTO issued_tickets
+    -- Πόσα εισιτήρια υπάρχουν συνολικά για το event
+    SELECT COUNT(*) INTO total_tickets
     FROM Ticket
     WHERE Event_Event_id = NEW.Event_Event_id;
 
-    -- Βρες τη μέγιστη χωρητικότητα της σκηνής
-    SELECT s.MaxCapacity INTO max_capacity
-    FROM Event e
-    JOIN Stage s ON e.Stage_Stage_id = s.Stage_id
-    WHERE e.Event_id = NEW.Event_Event_id;
+    -- Πόσα από αυτά έχουν αγοραστεί (visitor assigned)
+    SELECT COUNT(*) INTO sold_tickets
+    FROM Ticket
+    WHERE Event_Event_id = NEW.Event_Event_id
+      AND Visitor_Visitor_id IS NOT NULL;
 
-    -- Αν δεν έχουν εξαντληθεί, μπλόκαρε το resale
-    IF issued_tickets < max_capacity THEN
+    -- Αν δεν έχουν πουληθεί όλα, μπλοκάρουμε το resale
+    IF sold_tickets < total_tickets THEN
       SIGNAL SQLSTATE '45000'
       SET MESSAGE_TEXT = 'You cannot resell a ticket unless the event is sold out.';
     END IF;
@@ -1335,6 +1150,8 @@ END;
 //
 
 DELIMITER ;
+*/
+
 
 -- όταν πάει να γίνει insert στη resalequeue ελέγχεται αν το θέλει κάποιος βάση event & type και δίνεται αυτόματα με fifo αλλιώς καταχωρείται
 
@@ -1497,23 +1314,22 @@ BEGIN
   SELECT 
     e.Stage_Stage_id,
     e.Date,
-    COUNT(DISTINCT t.Ticket_id) AS audience_count,
+    COUNT(DISTINCT t.Visitor_Visitor_id) AS audience_count,
     COUNT(DISTINCT s.Staff_id) AS security_count,
-    CEIL(COUNT(DISTINCT t.Ticket_id) * 0.05) AS required_min_security
+    CEIL(COUNT(DISTINCT t.Visitor_Visitor_id) * 0.05) AS required_min_security
   FROM Event e
-    JOIN Ticket t ON t.Event_Event_id = e.Event_id
+    JOIN Ticket t ON t.Event_Event_id = e.Event_id AND t.IsActive = 1
     JOIN Event_has_Staff es ON es.Event_Event_id = e.Event_id
     JOIN Staff s ON s.Staff_id = es.Staff_Staff_id
-  WHERE t.IsActive = TRUE
-    AND s.Role_Name IN ('Security', 'First Aid Responder')
+  WHERE s.Role_Name IN ('Security', 'First Aid Responder')
   GROUP BY e.Stage_Stage_id, e.Date
-  HAVING security_count < CEIL(COUNT(DISTINCT t.Ticket_id) * 0.05);
+  HAVING security_count < CEIL(COUNT(DISTINCT t.Visitor_Visitor_id) * 0.05);
 
-  -- Δείξε τα αποτελέσματα
   SELECT * FROM SecurityViolations;
 END //
 
 DELIMITER ;
+
 
 
 
@@ -1538,19 +1354,56 @@ BEGIN
   SELECT 
     e.Stage_Stage_id,
     e.Date,
-    COUNT(DISTINCT t.Ticket_id) AS audience_count,
+    COUNT(DISTINCT t.Visitor_Visitor_id) AS audience_count,
     COUNT(DISTINCT s.Staff_id) AS support_count,
-    CEIL(COUNT(DISTINCT t.Ticket_id) * 0.02) AS required_min_support
+    CEIL(COUNT(DISTINCT t.Visitor_Visitor_id) * 0.02) AS required_min_support
   FROM Event e
-    JOIN Ticket t ON t.Event_Event_id = e.Event_id
+    JOIN Ticket t ON t.Event_Event_id = e.Event_id AND t.IsActive = 1
     JOIN Event_has_Staff es ON es.Event_Event_id = e.Event_id
     JOIN Staff s ON s.Staff_id = es.Staff_Staff_id
-  WHERE t.IsActive = TRUE
-    AND s.Role_Name IN ('Artist Liaison', 'Cleanup Crew', 'Ticket Scanner', 'Vendor Coordinator', 'Parking Attendant')
+  WHERE s.Role_Name IN ('Artist Liaison', 'Cleanup Crew', 'Ticket Scanner', 'Vendor Coordinator', 'Parking Attendant')
   GROUP BY e.Stage_Stage_id, e.Date
-  HAVING support_count < CEIL(COUNT(DISTINCT t.Ticket_id) * 0.02);
+  HAVING support_count < CEIL(COUNT(DISTINCT t.Visitor_Visitor_id) * 0.02);
 
   SELECT * FROM SupportViolations;
+END //
+
+DELIMITER ;
+
+
+
+-- === check_vip_limit.sql ===
+-- VIP ≤ 10% χωρητικότητας σκηνής
+
+DELIMITER //
+
+CREATE PROCEDURE CheckVipLimitPerEvent()
+BEGIN
+  DROP TEMPORARY TABLE IF EXISTS VipViolations;
+
+  CREATE TEMPORARY TABLE VipViolations (
+    event_id INT,
+    stage_id INT,
+    max_capacity INT,
+    vip_count INT,
+    allowed_vip INT
+  );
+
+  INSERT INTO VipViolations(event_id, stage_id, max_capacity, vip_count, allowed_vip)
+  SELECT 
+    e.Event_id,
+    s.Stage_id,
+    s.MaxCapacity,
+    COUNT(t.Ticket_id) AS vip_count,
+    FLOOR(s.MaxCapacity * 0.10) AS allowed_vip
+  FROM Event e
+    JOIN Stage s ON e.Stage_Stage_id = s.Stage_id
+    JOIN Ticket t ON t.Event_Event_id = e.Event_id
+  WHERE t.Ticket_type_Type = 'VIP'
+  GROUP BY e.Event_id, s.Stage_id, s.MaxCapacity
+  HAVING vip_count > FLOOR(s.MaxCapacity * 0.10);
+
+  SELECT * FROM VipViolations;
 END //
 
 DELIMITER ;
