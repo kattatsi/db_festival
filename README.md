@@ -39,6 +39,11 @@
 * Η συνολική διάρκεια όλων των performances που πραγματοποιούνται την ίδια ημερομηνία ενός festival δεν μπορεί να ξεπερνά τις 13 ώρες.
 
 
+## ER Diagram
+![ER Diagram](https://github.com/user-attachments/assets/30d19641-322c-4d3e-b098-e456490a3e1f)
 
 ## Relational Diagram
 ![Relational Diagram](https://github.com/user-attachments/assets/5cb67ff7-d9eb-4044-ad70-73f152c14ced)
+
+
+
