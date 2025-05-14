@@ -43,7 +43,7 @@
 
 
 ## ER Diagram
-![ER Diagram](https://github.com/user-attachments/assets/bc985714-3c96-4856-b887-5785dca71a8d)
+![ER Diagram](https://github.com/user-attachments/assets/6bf1768c-380f-4231-a85a-37464f330b0b)
 
 ## Relational Diagram
 ![Relational Diagram](https://github.com/user-attachments/assets/5cb67ff7-d9eb-4044-ad70-73f152c14ced)
